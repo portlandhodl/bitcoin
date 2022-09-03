@@ -10,7 +10,7 @@ WXLIBS=$(shell wx-config --libs)
 
 USE_UPNP:=0
 
-DEFS=-DNOPCH -DFOURWAYSSE2 -DUSE_SSL
+DEFS=-DNOPCH -DFOURWAYSSE2 -DUSE_SSL -L/home/qrsnap/git/openssl -I/home/qrsnap/git/openssl/include
 
 # for boost 1.37, add -mt to the boost libraries
 LIBS= \
@@ -19,6 +19,7 @@ LIBS= \
    -l boost_filesystem \
    -l boost_program_options \
    -l boost_thread \
+   -l boost_serialization \
    -l db_cxx \
    -l ssl \
    -l crypto
@@ -37,7 +38,7 @@ LIBS+= \
 
 
 DEBUGFLAGS=-g -D__WXDEBUG__
-CXXFLAGS=-O2 -Wno-invalid-offsetof -Wformat $(DEBUGFLAGS) $(DEFS)
+CXXFLAGS=-O2 -std=c++0x -Wno-invalid-offsetof -Wformat $(DEBUGFLAGS) $(DEFS)
 HEADERS=headers.h strlcpy.h serialize.h uint256.h util.h key.h bignum.h base58.h \
     script.h db.h net.h irc.h keystore.h main.h wallet.h rpc.h uibase.h ui.h noui.h init.h
 

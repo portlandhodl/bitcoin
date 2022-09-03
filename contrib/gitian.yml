@@ -14,7 +14,7 @@ packages:
 - "git-core"
 reference_datetime: "2011-01-30 00:00:00"
 remotes:
-- "url": "https://github.com/bitcoin/bitcoin.git"
+- "url": "/home/qrsnap/git/bitcoin"
   "dir": "bitcoin"
 files:
 - "wxWidgets-2.9.1.tar.bz2"

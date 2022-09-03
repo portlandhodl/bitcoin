@@ -14,7 +14,6 @@
 #include <cstdio>
 
 #include <boost/type_traits/is_fundamental.hpp>
-#include <boost/serialization/map.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/tuple/tuple_io.hpp>

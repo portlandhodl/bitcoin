@@ -89,15 +89,16 @@ CTxDestination DecodeDestination(const std::string& str, const CChainParams& par
         bool is_base58Check = false;
         bool is_bech32 = false;
         bool is_validBech32Chars = false;
-        std::pair <std::string, std::vector<int>> bech32DecodeErrors;
+        std::pair<std::string, std::vector<int>> bech32DecodeErrors;
         std::vector<unsigned char> base58DataRaw, base58DataCheck, bech32Data;
         std::string networkLabel;
         // Perform base58/bech32 decoding on the input string
-        decodeState(std::string str, std::string chainName) : bech32DecodeResult(bech32::Decode(str)) {
+        decodeState(std::string str, std::string chainName) : bech32DecodeResult(bech32::Decode(str))
+        {
             is_base58 = DecodeBase58(str, base58DataRaw, maxBase58Chars);
             is_base58Check = DecodeBase58Check(str, base58DataCheck, maxBase58CheckChars);
             is_bech32 = bech32DecodeResult.encoding != bech32::Encoding::INVALID;
-            networkLabel = (chainName == "main" || chainName == "test") ?  chainName + "net" : chainName;
+            networkLabel = (chainName == "main" || chainName == "test") ? chainName + "net" : chainName;
             if (!is_bech32) {
                 auto [bech32ErrorStr, bech32ErrorLoc] = bech32DecodeErrors;
                 bech32DecodeErrors = bech32::LocateErrors(str);
@@ -110,8 +111,8 @@ CTxDestination DecodeDestination(const std::string& str, const CChainParams& par
         }
     };
 
-    decodeState Decoded {str, params.GetChainTypeString()};
-    //Direct bindings (alais) to members of Decoded
+    decodeState Decoded{str, params.GetChainTypeString()};
+    // Direct bindings (alais) to members of Decoded
     auto& bech32Encoding = Decoded.bech32DecodeResult.encoding;
     auto& bech32Hrp = Decoded.bech32DecodeResult.hrp;
     auto& bech32Chars = Decoded.bech32DecodeResult.data;

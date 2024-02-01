@@ -127,6 +127,7 @@ bool IsStandardTx(const CTransaction& tx, const std::optional<unsigned>& max_dat
             reason = "bare-multisig";
             return false;
         }
+    }
 
     return true;
 }

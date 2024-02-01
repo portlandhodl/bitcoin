@@ -19,8 +19,8 @@ static constexpr uint32_t MAX_PACKAGE_COUNT{25};
     to allow for context-less checks. This must allow a superset of sigops
     weighted vsize limited transactions to not disallow transactions we would
     have otherwise accepted individually. */
-static constexpr uint32_t MAX_PACKAGE_WEIGHT = 3996000;
-static_assert(MAX_PACKAGE_WEIGHT >= MAX_STANDARD_TX_WEIGHT);
+static constexpr uint32_t MAX_PACKAGE_WEIGHT = DEFAULT_BLOCK_MAX_WEIGHT;
+static_assert(MAX_PACKAGE_WEIGHT > MAX_STANDARD_TX_WEIGHT);
 
 // If a package is to be evaluated, it must be at least as large as the mempool's ancestor/descendant limits,
 // otherwise transactions that would be individually accepted may be rejected in a package erroneously.

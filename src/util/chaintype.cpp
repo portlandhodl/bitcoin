@@ -49,6 +49,8 @@ std::string ChainTypeToDisplayString(ChainType chain)
         return "Bitcoin";
     case ChainType::TESTNET:
         return "testnet";
+    case ChainType::TESTNET4:
+        return "testnet4";
     case ChainType::SIGNET:
         return "signet";
     case ChainType::REGTEST:

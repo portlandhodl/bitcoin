@@ -77,9 +77,9 @@ public:
         return bech32::Encode(bech32::Encoding::BECH32M, m_params.Bech32HRP(), data);
     }
 
-    std::string operator()(const WitnessV3P2QRH& id) const
+    std::string operator()(const WitnessV2P2TSH& id) const
     {
-        std::vector<unsigned char> data = {3};  // Version 3
+        std::vector<unsigned char> data = {2};  // Version 2
         data.reserve(53);  // Reserve space for the hash
         ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, id.begin(), id.end());
         return bech32::Encode(bech32::Encoding::BECH32M, m_params.Bech32HRP(), data);
@@ -189,13 +189,13 @@ CTxDestination DecodeDestination(const std::string& str, const CChainParams& par
                 return tap;
             }
 
-            if (version == 3) {
-                WitnessV3P2QRH qrh;
-                if (data.size() == qrh.size()) {
-                    std::copy(data.begin(), data.end(), qrh.begin());
-                    return qrh;
+            if (version == 2 && data.size() == WITNESS_V2_P2TSH_SIZE) {
+                WitnessV2P2TSH tsh;
+                if (data.size() == tsh.size()) {
+                    std::copy(data.begin(), data.end(), tsh.begin());
+                    return tsh;
                 }
-                error_str = strprintf("Invalid P2QRH address program size (%d %s)", data.size(), byte_str);
+                error_str = strprintf("Invalid P2TSH address program size (%d %s)", data.size(), byte_str);
                 return CNoDestination();
             }
 

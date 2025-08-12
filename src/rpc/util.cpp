@@ -346,12 +346,12 @@ public:
         return obj;
     }
 
-    UniValue operator()(const WitnessV3P2QRH& id) const
+    UniValue operator()(const WitnessV2P2TSH& id) const
     {
         UniValue obj(UniValue::VOBJ);
         obj.pushKV("isscript", true);
         obj.pushKV("iswitness", true);
-        obj.pushKV("witness_version", 3);
+        obj.pushKV("witness_version", 2);
         obj.pushKV("witness_program", HexStr(id));
         return obj;
     }

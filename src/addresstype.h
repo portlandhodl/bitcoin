@@ -91,11 +91,11 @@ struct WitnessV1Taproot : public XOnlyPubKey
     explicit WitnessV1Taproot(const XOnlyPubKey& xpk) : XOnlyPubKey(xpk) {}
 };
 
-struct WitnessV3P2QRH : public BaseHash<uint256>
+struct WitnessV2P2TSH : public BaseHash<uint256>
 {
-    WitnessV3P2QRH() : BaseHash() {}
-    explicit WitnessV3P2QRH(const uint256& hash) : BaseHash(hash) {}
-    explicit WitnessV3P2QRH(const CScript& script);
+    WitnessV2P2TSH() : BaseHash() {}
+    explicit WitnessV2P2TSH(const uint256& hash) : BaseHash(hash) {}
+    explicit WitnessV2P2TSH(const CScript& script);
 };
 
 //! CTxDestination subtype to encode any future Witness version
@@ -145,9 +145,10 @@ struct PayToAnchor : public WitnessUnknown
  *  * WitnessV1Taproot: TxoutType::WITNESS_V1_TAPROOT destination (P2TR address)
  *  * PayToAnchor: TxoutType::ANCHOR destination (P2A address)
  *  * WitnessUnknown: TxoutType::WITNESS_UNKNOWN destination (P2W??? address)
+ *  * WitnessV2P2TSH: TxoutType::WITNESS_V2_P2TSH destination (P2TSH address)
  *  A CTxDestination is the internal data type encoded in a bitcoin address
  */
-using CTxDestination = std::variant<CNoDestination, PubKeyDestination, PKHash, ScriptHash, WitnessV0ScriptHash, WitnessV0KeyHash, WitnessV1Taproot, PayToAnchor, WitnessUnknown, WitnessV3P2QRH>;
+using CTxDestination = std::variant<CNoDestination, PubKeyDestination, PKHash, ScriptHash, WitnessV0ScriptHash, WitnessV0KeyHash, WitnessV1Taproot, PayToAnchor, WitnessUnknown, WitnessV2P2TSH>;
 
 /** Check whether a CTxDestination corresponds to one with an address. */
 bool IsValidDestination(const CTxDestination& dest);

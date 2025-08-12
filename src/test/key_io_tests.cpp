@@ -57,15 +57,14 @@ BOOST_AUTO_TEST_CASE(key_io_valid_parse)
             destination = DecodeDestination(exp_base58string);
             CScript script = GetScriptForDestination(destination);
             
-            // Check if this is a witness version 3 address (P2QRH or other v3 types)
-            bool is_p2qrh = false;
-            if (exp_payload.size() >= 2 && static_cast<int>(exp_payload[0]) == 0x53) {
-                is_p2qrh = true;
+            // Check if this is a witness version 2 address (P2TSH or other v2 types)
+            bool is_p2tsh = false;
+            if (exp_payload.size() >= 2 && static_cast<int>(exp_payload[0]) == 0x52) {
+                is_p2tsh = true;
             }
             
-            if (is_p2qrh) {
-                // TODO: Add P2QRH-specific validation here
-                // For now, do nothing in this branch
+            if (is_p2tsh) {
+                // TODO: Add P2TSH-specific validation here
             } else {
                 BOOST_CHECK_MESSAGE(IsValidDestination(destination), "!IsValid:" + strTest);
                 BOOST_CHECK_EQUAL(HexStr(script), HexStr(exp_payload));
@@ -81,9 +80,8 @@ BOOST_AUTO_TEST_CASE(key_io_valid_parse)
             }
             destination = DecodeDestination(exp_base58string);
             
-            if (is_p2qrh) {
-                // TODO: Add P2QRH-specific case flip validation here
-                // For now, do nothing in this branch
+            if (is_p2tsh) {
+                // TODO: Add P2TSH-specific case flip validation here
             } else {
                 BOOST_CHECK_MESSAGE(IsValidDestination(destination) == try_case_flip, "!IsValid case flipped:" + strTest);
                 if (IsValidDestination(destination)) {

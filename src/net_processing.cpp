@@ -3326,7 +3326,9 @@ void PeerManagerImpl::ProcessInvalidTx(NodeId nodeid, const CTransactionRef& ptx
             RecentRejectsFilter().insert(ptx->GetHash().ToUint256());
             m_txrequest.ForgetTxHash(ptx->GetHash());
         }
-        if (maybe_add_extra_compact_tx && RecursiveDynamicUsage(*ptx) < 100000) {
+        // Don't add transactions rejected for standardness policy violations to compact extra transactions
+        if (maybe_add_extra_compact_tx && RecursiveDynamicUsage(*ptx) < 100000 &&
+            state.GetResult() != TxValidationResult::TX_NOT_STANDARD) {
             AddToCompactExtraTransactions(ptx);
         }
     }

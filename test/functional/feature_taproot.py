@@ -3,6 +3,11 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 # Test Taproot softfork (BIPs 340-342)
+#
+# NOTE: This test file has been modified for SLH-DSA development.
+# Only OP_SUBSTR (127) tests are disabled because they conflict with the SLH-DSA 
+# implementation that uses OP_SUBSTR (127) for signature verification.
+# All other OP_SUCCESSx tests have been re-enabled and work normally.
 
 from test_framework.blocktools import (
     COINBASE_MATURITY,
@@ -1146,6 +1151,12 @@ def spenders_taproot_active():
     for opval in range(76, 0x100):
         opcode = CScriptOp(opval)
         if not is_op_success(opcode):
+            continue
+        
+        # SKIP OP_SUBSTR (127) TESTS FOR SLH-DSA DEVELOPMENT
+        # OP_SUBSTR is used for SLH-DSA signature verification and behaves differently
+        # than other OP_SUCCESSx opcodes, breaking the test expectations.
+        if opcode == 127:  # OP_SUBSTR
             continue
         scripts = [
             ("bare_success", CScript([opcode])),

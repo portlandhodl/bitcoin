@@ -296,6 +296,10 @@ private:
     unsigned int nIn;
     const CAmount amount;
     const PrecomputedTransactionData* txdata;
+    
+    // Friend function for SLH-DSA signature verification
+    template<typename U>
+    friend bool HandleSLHDSASignature(std::vector<std::vector<unsigned char>>& stack, const CScript& exec_script, unsigned int flags, const GenericTransactionSignatureChecker<U>& checker, ScriptExecutionData& execdata, ScriptError* serror);
 
 protected:
     virtual bool VerifyECDSASignature(const std::vector<unsigned char>& vchSig, const CPubKey& vchPubKey, const uint256& sighash) const;

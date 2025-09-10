@@ -8,9 +8,14 @@
 #include <crypto/ripemd160.h>
 #include <crypto/sha1.h>
 #include <crypto/sha256.h>
+#include <cstring>
+#include <logging.h>
 #include <pubkey.h>
 #include <script/script.h>
 #include <uint256.h>
+#include <util/strencodings.h>
+#include <libbitcoinpqc/bitcoinpqc.h>
+#include <libbitcoinpqc/slh_dsa.h>
 
 typedef std::vector<unsigned char> valtype;
 
@@ -215,11 +220,16 @@ bool CheckSignatureEncoding(const std::vector<unsigned char> &vchSig, unsigned i
 }
 
 bool static CheckPubKeyEncoding(const valtype &vchPubKey, unsigned int flags, const SigVersion &sigversion, ScriptError* serror) {
+    LogPrintf("SLH-DSA DEBUG: CheckPubKeyEncoding called with pubkey size=%zu, sigversion=%d, flags=0x%x\n", 
+             vchPubKey.size(), (int)sigversion, flags);
+    
     if ((flags & SCRIPT_VERIFY_STRICTENC) != 0 && !IsCompressedOrUncompressedPubKey(vchPubKey)) {
+        LogPrintf("SLH-DSA DEBUG: CheckPubKeyEncoding failed STRICTENC check for %zu-byte pubkey\n", vchPubKey.size());
         return set_error(serror, SCRIPT_ERR_PUBKEYTYPE);
     }
     // Only compressed keys are accepted in segwit
     if ((flags & SCRIPT_VERIFY_WITNESS_PUBKEYTYPE) != 0 && sigversion == SigVersion::WITNESS_V0 && !IsCompressedPubKey(vchPubKey)) {
+        LogPrintf("SLH-DSA DEBUG: CheckPubKeyEncoding failed WITNESS_PUBKEYTYPE check for %zu-byte pubkey\n", vchPubKey.size());
         return set_error(serror, SCRIPT_ERR_WITNESS_PUBKEYTYPE);
     }
     return true;
@@ -1783,39 +1793,196 @@ bool GenericTransactionSignatureChecker<T>::CheckSequence(const CScriptNum& nSeq
     return true;
 }
 
+// Helper function to create message hash for SLH-DSA using the same approach as Schnorr
+template<typename T>
+static bool CreateSLHDSAMessageHash(uint256& hash_out, ScriptExecutionData& execdata, const T& tx_to, uint32_t in_pos, uint8_t hash_type, const PrecomputedTransactionData& cache, MissingDataBehavior mdb)
+{
+    // For SLH-DSA in Tapscript context, we use the same sighash construction
+    // as Schnorr signatures in Tapscript (BIP 341)
+    
+    // We can reuse the existing SignatureHashSchnorr function since it implements
+    // the correct BIP 341 Tapscript sighash construction
+    return SignatureHashSchnorr(hash_out, execdata, tx_to, in_pos, hash_type, SigVersion::TAPSCRIPT, cache, mdb);
+}
+
+// Handle SLH-DSA signature verification for OP_SUCCESS127
+template<typename T>
+static bool HandleSLHDSASignature(std::vector<valtype>& stack, const CScript& exec_script, unsigned int flags, const GenericTransactionSignatureChecker<T>& checker, ScriptExecutionData& execdata, ScriptError* serror)
+{
+    LogPrintf("SLH-DSA DEBUG: HandleSLHDSASignature called with stack size %zu\n", stack.size());
+    
+    // The script format is: <32-byte-pubkey> OP_RESERVED
+    // The stack contains the signature from the previous witness element
+    // We need to extract the public key from the script
+    if (stack.size() != 1) {
+        LogPrintf("SLH-DSA DEBUG: Expected stack size 1, got %zu\n", stack.size());
+        return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
+    }
+    
+    valtype signature = stack[0];  // Create mutable copy
+    LogPrintf("SLH-DSA DEBUG: signature size=%zu\n", signature.size());
+    
+    // Validate signature size (SLH-DSA signatures are 7856 bytes)
+    if (signature.size() < 100) {
+        LogPrintf("SLH-DSA DEBUG: Invalid signature size %zu, expected >= 100\n", signature.size());
+        return set_error(serror, SCRIPT_ERR_SLHDSA_SIG_SIZE);
+    }
+    
+    // Extract public key from script: OP_PUSHBYTES_32 <32-byte-pubkey> OP_RESERVED
+    if (exec_script.size() != 34) {
+        LogPrintf("SLH-DSA DEBUG: Invalid script size %zu, expected 34 (OP_PUSHBYTES_32 + 32-byte pubkey + OP_RESERVED)\n", exec_script.size());
+        return set_error(serror, SCRIPT_ERR_BAD_OPCODE);
+    }
+    
+    // Extract the 32-byte public key from the script (skip the OP_PUSHBYTES_32 opcode)
+    valtype pubkey(exec_script.begin() + 1, exec_script.begin() + 33);
+    LogPrintf("SLH-DSA DEBUG: Extracted pubkey size=%zu\n", pubkey.size());
+    
+    // Extract hash type from signature (similar to Schnorr signatures)
+    uint8_t hashtype = SIGHASH_DEFAULT;
+    size_t sig_size = signature.size();
+    
+    // Handle potential signature size mismatch (7857 vs 7856 bytes)
+    // The extra byte is the hash type byte (similar to Schnorr)
+    if (sig_size == 7857) {
+        // Extract hash type from the last byte
+        hashtype = signature[sig_size - 1];
+        LogPrintf("SLH-DSA DEBUG: Extracted hash type from signature: 0x%02x (%u)\n", 
+                  hashtype, hashtype);
+        
+        sig_size = 7856;  // Strip the hash type byte
+        LogPrintf("SLH-DSA DEBUG: Stripping hash type byte from signature (7857 -> 7856 bytes)\n");
+    }
+    
+    // Create message hash for SLH-DSA verification using the extracted hash type
+    uint256 message_hash;
+    
+    // Ensure execdata is properly initialized for SignatureHashSchnorr
+    if (!execdata.m_codeseparator_pos_init) {
+        execdata.m_codeseparator_pos = 0xFFFFFFFFUL;
+        execdata.m_codeseparator_pos_init = true;
+    }
+    
+    // Create the message hash using the extracted hash type (same as Schnorr signatures)
+    if (!CreateSLHDSAMessageHash(message_hash, execdata, *checker.txTo, checker.nIn, hashtype, *checker.txdata, checker.m_mdb)) {
+        LogPrintf("SLH-DSA DEBUG: Failed to create message hash with hashtype 0x%02x\n", hashtype);
+        return set_error(serror, SCRIPT_ERR_SLHDSA_SIG);
+    }
+    
+    LogPrintf("SLH-DSA DEBUG: Created message hash with hashtype 0x%02x: %s\n", 
+              hashtype, message_hash.ToString().c_str());
+    
+    LogPrintf("SLH-DSA DEBUG: Using algorithm BITCOIN_PQC_SLH_DSA_SHAKE_128S\n");
+    LogPrintf("SLH-DSA DEBUG: Full Pubkey: %s\n", HexStr(pubkey).c_str());
+    LogPrintf("SLH-DSA DEBUG: Full Message hash (sighash): %s\n", HexStr(message_hash).c_str());
+    LogPrintf("SLH-DSA DEBUG: Signature (first 16 bytes): %s\n", HexStr(std::span<const uint8_t>(signature.data(), 16)).c_str());
+    
+    // Debug: Check sizes match library expectations
+    LogPrintf("SLH-DSA DEBUG: Pubkey size: %zu bytes (expected: 32)\n", pubkey.size());
+    LogPrintf("SLH-DSA DEBUG: Signature size: %zu bytes (expected: 7856)\n", signature.size());
+    LogPrintf("SLH-DSA DEBUG: Message hash size: %zu bytes (expected: 32)\n", message_hash.size());
+    
+    // Use the low-level SLH-DSA function directly (matches our 32-byte pubkeys and 7856-byte signatures)
+    int result = slh_dsa_shake_128s_verify(
+        signature.data(),
+        sig_size,
+        message_hash.begin(),
+        message_hash.size(),
+        pubkey.data()
+    );
+    
+    LogPrintf("SLH-DSA DEBUG: slh_dsa_shake_128s_verify returned: %d\n", result);
+    
+    if (result != 0) {
+        LogPrintf("SLH-DSA DEBUG: SLH-DSA signature verification failed with error %d\n", result);
+        return set_error(serror, SCRIPT_ERR_SLHDSA_SIG);
+    }
+    
+    LogPrintf("SLH-DSA DEBUG: SLH-DSA signature verification successful!\n");
+    
+    // Clear the stack and push success
+    stack.clear();
+    stack.emplace_back(1, 1); // success
+    
+    return set_success(serror);
+}
+
 // explicit instantiation
 template class GenericTransactionSignatureChecker<CTransaction>;
 template class GenericTransactionSignatureChecker<CMutableTransaction>;
 
 static bool ExecuteWitnessScript(const std::span<const valtype>& stack_span, const CScript& exec_script, unsigned int flags, SigVersion sigversion, const BaseSignatureChecker& checker, ScriptExecutionData& execdata, ScriptError* serror)
 {
+    LogPrintf("SLH-DSA DEBUG: ExecuteWitnessScript called with sigversion=%d, script size=%zu\n", (int)sigversion, exec_script.size());
     std::vector<valtype> stack{stack_span.begin(), stack_span.end()};
 
     if (sigversion == SigVersion::TAPSCRIPT) {
         // OP_SUCCESSx processing overrides everything, including stack element size limits
         CScript::const_iterator pc = exec_script.begin();
+        bool found_op_success127 = false;
         while (pc < exec_script.end()) {
             opcodetype opcode;
             if (!exec_script.GetOp(pc, opcode)) {
                 // Note how this condition would not be reached if an unknown OP_SUCCESSx was found
                 return set_error(serror, SCRIPT_ERR_BAD_OPCODE);
             }
+            LogPrintf("SLH-DSA DEBUG: Processing opcode %d (0x%02x), IsOpSuccess=%d\n", opcode, opcode, IsOpSuccess(opcode));
             // New opcodes will be listed here. May use a different sigversion to modify existing opcodes.
             if (IsOpSuccess(opcode)) {
+                // Handle OP_SUCCESS127 for SLH-DSA signatures
+                if (opcode == OP_SUBSTR) {
+                    LogPrintf("SLH-DSA DEBUG: Found OP_SUBSTR (OP_SUCCESS127), checking for SLH-DSA signature\n");
+                    
+                    // Only trigger SLH-DSA if we have a large signature (7856+ bytes)
+                    if (stack.size() >= 1 && stack[0].size() >= 7856) {
+                        LogPrintf("SLH-DSA DEBUG: Large signature detected (%zu bytes), calling HandleSLHDSASignature\n", stack[0].size());
+                        found_op_success127 = true;
+                        const auto* tx_checker = dynamic_cast<const GenericTransactionSignatureChecker<CTransaction>*>(&checker);
+                        if (!tx_checker) {
+                            LogPrintf("SLH-DSA DEBUG: Failed to cast checker to transaction checker\n");
+                            return set_error(serror, SCRIPT_ERR_SLHDSA_SIG);
+                        }
+                        return HandleSLHDSASignature(stack, exec_script, flags, *tx_checker, execdata, serror);
+                    } else {
+                        LogPrintf("SLH-DSA DEBUG: OP_SUBSTR found but signature size %zu < 7856, treating as normal OP_SUCCESS\n", 
+                                  stack.size() > 0 ? stack[0].size() : 0);
+                        // Check if we should discourage OP_SUCCESS (for mempool policy)
+                        if (flags & SCRIPT_VERIFY_DISCOURAGE_OP_SUCCESS) {
+                            return set_error(serror, SCRIPT_ERR_DISCOURAGE_OP_SUCCESS);
+                        }
+                        // Treat as normal OP_SUCCESS (return success without SLH-DSA verification)
+                        return set_success(serror);
+                    }
+                }
+                
+                // For all other OP_SUCCESSx opcodes, apply the standard discourage check
                 if (flags & SCRIPT_VERIFY_DISCOURAGE_OP_SUCCESS) {
                     return set_error(serror, SCRIPT_ERR_DISCOURAGE_OP_SUCCESS);
                 }
+                
                 return set_success(serror);
             }
         }
 
         // Tapscript enforces initial stack size limits (altstack is empty here)
         if (stack.size() > MAX_STACK_SIZE) return set_error(serror, SCRIPT_ERR_STACK_SIZE);
-    }
-
-    // Disallow stack item size > MAX_SCRIPT_ELEMENT_SIZE in witness stack
-    for (const valtype& elem : stack) {
-        if (elem.size() > MAX_SCRIPT_ELEMENT_SIZE) return set_error(serror, SCRIPT_ERR_PUSH_SIZE);
+        
+        // For SLH-DSA, allow larger stack elements if OP_SUCCESS127 was found
+        unsigned int max_element_size = found_op_success127 ? MAX_SCRIPT_ELEMENT_SIZE_SLHDSA : MAX_SCRIPT_ELEMENT_SIZE;
+        
+        // Disallow stack item size > max_element_size in witness stack
+        for (const auto& elem : stack) {
+            if (elem.size() > max_element_size) {
+                LogPrintf("SLH-DSA DEBUG: Stack element size %zu exceeds limit %u (found_op_success127=%d)\n", 
+                         elem.size(), max_element_size, found_op_success127);
+                return set_error(serror, SCRIPT_ERR_PUSH_SIZE);
+            }
+        }
+    } else {
+        // Disallow stack item size > MAX_SCRIPT_ELEMENT_SIZE in witness stack
+        for (const auto& elem : stack) {
+            if (elem.size() > MAX_SCRIPT_ELEMENT_SIZE) return set_error(serror, SCRIPT_ERR_PUSH_SIZE);
+        }
     }
 
     // Run the script interpreter.

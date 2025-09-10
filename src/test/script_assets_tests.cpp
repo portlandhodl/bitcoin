@@ -128,8 +128,8 @@ static void AssetTest(const UniValue& test, SignatureCache& signature_cache)
                 // Check if this is a P2TSH script (witness version 2, 32-byte program)
                 bool is_p2tsh_script = false;
                 if (prevouts[idx].scriptPubKey.size() >= 2 && 
-                    prevouts[idx].scriptPubKey[0] == 0x53 && 
-                    prevouts[idx].scriptPubKey[1] == 0x20 &&
+                    prevouts[idx].scriptPubKey[0] == 0x53 && // witness version 2
+                    prevouts[idx].scriptPubKey[1] == 0x20 && // 32-byte program
                     tx.vin[idx].scriptSig.empty()) {  // P2TSH should have empty ScriptSig
                     is_p2tsh_script = true;
                 }
@@ -144,8 +144,8 @@ static void AssetTest(const UniValue& test, SignatureCache& signature_cache)
                     // Debug output to see what's failing
                     std::cout << "ScriptSig: " << HexStr(tx.vin[idx].scriptSig) << std::endl;
                     std::cout << "ScriptPubKey: " << HexStr(prevouts[idx].scriptPubKey) << std::endl;
-                    std::cout << "Flags: " << flags << std::endl;
-                    std::cout << "Test flags: " << test_flags << std::endl;
+                    std::cout << "Current Flags: " << flags << std::endl;
+                    std::cout << "All flags: " << test_flags << std::endl;
                     std::cout << "Witness size: " << tx.vin[idx].scriptWitness.stack.size() << std::endl;
                     std::cout << "Is P2TSH: " << (is_p2tsh_script ? "true" : "false") << std::endl;
                 }

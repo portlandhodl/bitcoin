@@ -27,6 +27,9 @@
 // Maximum number of bytes pushable to the stack
 static const unsigned int MAX_SCRIPT_ELEMENT_SIZE = 520;
 
+// Add this line after the existing MAX_SCRIPT_ELEMENT_SIZE definition
+static const unsigned int MAX_SCRIPT_ELEMENT_SIZE_SLHDSA = 8000;
+
 // Maximum number of non-push operations per script
 static const int MAX_OPS_PER_SCRIPT = 201;
 

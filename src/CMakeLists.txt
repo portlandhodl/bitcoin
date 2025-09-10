@@ -72,6 +72,25 @@ set_target_properties(secp256k1 PROPERTIES
 )
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+#=============================
+# libbitcoinpqc subtree
+#=============================
+message("")
+message("Configuring libbitcoinpqc subtree...")
+
+# Configure libbitcoinpqc build options
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Add the libbitcoinpqc subdirectory
+add_subdirectory(libbitcoinpqc)
+
+# Set target properties
+# Note: EXCLUDE_FROM_ALL removed to ensure bitcoinpqc is built when needed
+
+# Add libbitcoinpqc include directories to the main include path
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libbitcoinpqc/include)
+
 # Set top-level target output locations.
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
@@ -117,11 +136,13 @@ add_library(bitcoin_consensus STATIC EXCLUDE_FROM_ALL
   script/script_error.cpp
   uint256.cpp
 )
+
 target_link_libraries(bitcoin_consensus
   PRIVATE
     core_interface
     bitcoin_crypto
     secp256k1
+    bitcoinpqc
 )
 
 if(WITH_ZMQ)

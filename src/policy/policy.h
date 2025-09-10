@@ -53,7 +53,7 @@ static constexpr unsigned int MAX_STANDARD_P2WSH_STACK_ITEM_SIZE{80};
 /** The maximum size in bytes of each witness stack item in a standard BIP 342 script (Taproot, leaf version 0xc0) */
 static constexpr unsigned int MAX_STANDARD_TAPSCRIPT_STACK_ITEM_SIZE{80};
 /** The maximum size in bytes of each witness stack item in a standard P2TSH script */
-static constexpr unsigned int MAX_STANDARD_P2TSH_STACK_ITEM_SIZE{80};
+static constexpr unsigned int MAX_STANDARD_P2TSH_STACK_ITEM_SIZE{8000};
 /** The maximum size in bytes of a standard witnessScript */
 static constexpr unsigned int MAX_STANDARD_P2WSH_SCRIPT_SIZE{3600};
 /** The maximum size of a standard ScriptSig */

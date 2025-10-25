@@ -107,6 +107,8 @@ std::string ScriptErrorString(const ScriptError serror)
             return "Invalid SLH-DSA signature size";
         case SCRIPT_ERR_SLHDSA_SIG:
             return "Invalid SLH-DSA signature";
+        case SCRIPT_ERR_SCHNORR_SIG_IN_COMBINED:
+            return "Invalid Schnorr signature in combined script";
         case SCRIPT_ERR_TAPROOT_WRONG_CONTROL_SIZE:
             return "Invalid Taproot control block size";
         case SCRIPT_ERR_TAPSCRIPT_VALIDATION_WEIGHT:

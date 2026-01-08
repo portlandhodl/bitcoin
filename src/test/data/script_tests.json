@@ -2668,6 +2668,87 @@
     "TAPSCRIPT Test that DROP operations do not execute inside of a false IF conditional"
 ],
 
+["P2TSH tests"],
+[
+    [
+        "aa",
+        "bb",
+        "87",
+        "c1",
+        0.00000001
+    ],
+    "",
+    "0x52 0x20 0x7e04991706edb31549f786fa7113bb857ceb26174f7d08e9efa91decf13324a0",
+    "P2SH,WITNESS,TAPROOT",
+    "OK",
+    "P2TSH: Simple negative OP_EQUAL test pre-activation"
+],
+[
+    [
+        "aa",
+        "bb",
+        "87",
+        "c1",
+        0.00000001
+    ],
+    "",
+    "0x52 0x20 0x7e04991706edb31549f786fa7113bb857ceb26174f7d08e9efa91decf13324a0",
+    "P2SH,WITNESS,TAPROOT,P2TSH",
+    "EVAL_FALSE",
+    "P2TSH: Simple negative OP_EQUAL test post-activation"
+],
+[
+    [
+        "aa",
+        "aa",
+        "87",
+        "c1",
+        0.00000001
+    ],
+    "",
+    "0x52 0x20 0x7e04991706edb31549f786fa7113bb857ceb26174f7d08e9efa91decf13324a0",
+    "P2SH,WITNESS,TAPROOT,P2TSH",
+    "OK",
+    "P2TSH: Simple positive OP_EQUAL test post-activation"
+],
+[
+    [
+        "aa",
+        0.00000001
+    ],
+    "",
+    "0x52 0x20 0x7e04991706edb31549f786fa7113bb857ceb26174f7d08e9efa91decf13324a0",
+    "P2SH,WITNESS,TAPROOT,P2TSH",
+    "WITNESS_PROGRAM_MISMATCH",
+    "P2TSH: Key path spending not supported"
+],
+[
+    [
+        "aa",
+        "aa",
+        0.00000001
+    ],
+    "",
+    "0x52 0x20 0x7e04991706edb31549f786fa7113bb857ceb26174f7d08e9efa91decf13324a0",
+    "P2SH,WITNESS,TAPROOT,P2TSH",
+    "WITNESS_PROGRAM_MISMATCH",
+    "P2TSH: Witness program mismatch"
+],
+[
+    [
+        "aa",
+        "aa",
+        "87",
+        "c0",
+        0.00000001
+    ],
+    "",
+    "0x52 0x20 0x7e04991706edb31549f786fa7113bb857ceb26174f7d08e9efa91decf13324a0",
+    "P2SH,WITNESS,TAPROOT,P2TSH",
+    "P2TSH_WRONG_PARITY_BIT",
+    "P2TSH: Wrong parity bit"
+],
+
 ["NULLFAIL should cover all signatures and signatures only"],
 ["0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "0x01 0x14 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0x01 0x14 CHECKMULTISIG NOT", "DERSIG", "OK", "BIP66 and NULLFAIL-compliant"],
 ["0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "0x01 0x14 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0x01 0x14 CHECKMULTISIG NOT", "DERSIG,NULLFAIL", "OK", "BIP66 and NULLFAIL-compliant"],

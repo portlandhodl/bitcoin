@@ -2406,6 +2406,11 @@ static bool VerifyWitnessProgram(const CScriptWitness& witness, int witversion, 
                 return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_MISMATCH);
             }
             execdata.m_tapleaf_hash_init = true;
+            // Check for P2TSH-specific parity requirement (must be 0xc1 for Tapscript)
+            if ((control[0] & TAPROOT_LEAF_MASK) == TAPROOT_LEAF_TAPSCRIPT &&
+                control[0] != P2TSH_LEAF_TAPSCRIPT) {
+                return set_error(serror, SCRIPT_ERR_P2TSH_WRONG_PARITY_BIT);
+            }
             if (control[0] == P2TSH_LEAF_TAPSCRIPT) {
                 // Tapscript (leaf version 0xc1 since parity is always 1)
                 exec_script = CScript(script.begin(), script.end());

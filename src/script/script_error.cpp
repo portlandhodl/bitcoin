@@ -123,6 +123,8 @@ std::string ScriptErrorString(const ScriptError serror)
             return "Signature is found in scriptCode";
         case SCRIPT_ERR_P2TSH_WRONG_CONTROL_SIZE:
             return "Invalid P2TSH control block size";
+        case SCRIPT_ERR_P2TSH_WRONG_PARITY_BIT:
+            return "P2TSH leaf must use parity bit 1 (0xc1)";
         case SCRIPT_ERR_UNKNOWN_ERROR:
         case SCRIPT_ERR_ERROR_COUNT:
         default: break;

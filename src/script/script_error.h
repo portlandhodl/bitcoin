@@ -85,6 +85,7 @@ typedef enum ScriptError_t
 
     /* P2TSH */
     SCRIPT_ERR_P2TSH_WRONG_CONTROL_SIZE,
+    SCRIPT_ERR_P2TSH_WRONG_PARITY_BIT,
 
     /* Constant scriptCode */
     SCRIPT_ERR_OP_CODESEPARATOR,

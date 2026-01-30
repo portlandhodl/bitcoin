@@ -63,7 +63,7 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
     arith_uint256 bnNew;
 
-    // Special difficulty rule for Testnet4
+    // Special difficulty rule for testnetq
     if (params.enforce_BIP94) {
         // Here we use the first block of the difficulty period. This way
         // the real difficulty is always preserved in the first block as

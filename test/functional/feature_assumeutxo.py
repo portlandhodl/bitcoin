@@ -105,7 +105,7 @@ class AssumeutxoTest(BitcoinTestFramework):
         invalid_magics = [
             # magic, name, real
             [MAGIC_BYTES["mainnet"], "main", True],
-            [MAGIC_BYTES["testnet4"], "testnet4", True],
+            [MAGIC_BYTES["testnetq"], "testnetq", True],
             [MAGIC_BYTES["signet"], "signet", True],
             [0x00000000.to_bytes(4, 'big'), "", False],
             [0xffffffff.to_bytes(4, 'big'), "", False],

@@ -79,7 +79,7 @@ Notable changes
 
 ### Doc
 
-- #31007 doc: add testnet4 section header for config file
+- #31007 doc: add testnetq section header for config file
 
 ### CI
 

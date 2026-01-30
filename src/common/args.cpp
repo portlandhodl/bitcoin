@@ -800,11 +800,11 @@ std::variant<ChainType, std::string> ArgsManager::GetChainArg() const
     const bool fRegTest = get_net("-regtest");
     const bool fSigNet  = get_net("-signet");
     const bool fTestNet = get_net("-testnet");
-    const bool fTestNet4 = get_net("-testnet4");
+    const bool ftestnetq = get_net("-testnetq");
     const auto chain_arg = GetArg("-chain");
 
-    if ((int)chain_arg.has_value() + (int)fRegTest + (int)fSigNet + (int)fTestNet + (int)fTestNet4 > 1) {
-        throw std::runtime_error("Invalid combination of -regtest, -signet, -testnet, -testnet4 and -chain. Can use at most one.");
+    if ((int)chain_arg.has_value() + (int)fRegTest + (int)fSigNet + (int)fTestNet + (int)ftestnetq > 1) {
+        throw std::runtime_error("Invalid combination of -regtest, -signet, -testnet, -testnetq and -chain. Can use at most one.");
     }
     if (chain_arg) {
         if (auto parsed = ChainTypeFromString(*chain_arg)) return *parsed;
@@ -814,7 +814,7 @@ std::variant<ChainType, std::string> ArgsManager::GetChainArg() const
     if (fRegTest) return ChainType::REGTEST;
     if (fSigNet) return ChainType::SIGNET;
     if (fTestNet) return ChainType::TESTNET;
-    if (fTestNet4) return ChainType::TESTNETQ;
+    if (ftestnetq) return ChainType::TESTNETQ;
     return ChainType::MAIN;
 }
 

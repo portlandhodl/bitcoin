@@ -82,7 +82,7 @@ DEFAULT_MEMPOOL_EXPIRY_HOURS = 336  # hours
 
 MAGIC_BYTES = {
     "mainnet": b"\xf9\xbe\xb4\xd9",
-    "testnet4": b"\x1c\x16\x3f\x28",
+    "testnetq": b"\x1c\x16\x3f\x28",
     "regtest": b"\xfa\xbf\xb5\xda",
     "signet": b"\x0a\x03\xcf\x40",
 }

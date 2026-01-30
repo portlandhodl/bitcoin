@@ -162,7 +162,7 @@ For more detailed guidance on configuring and using CMake, please refer to the o
 
 ### Tests
 
-- The BIP94 timewarp attack mitigation (designed for testnet4) is no longer active on the regtest network. (#31156)
+- The BIP94 timewarp attack mitigation (designed for testnetq) is no longer active on the regtest network. (#31156)
 
 ### Dependencies
 

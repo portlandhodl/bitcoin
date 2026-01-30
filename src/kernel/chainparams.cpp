@@ -366,7 +366,7 @@ public:
 
         bech32_hrp = "tb";
 
-        vFixedSeeds = std::vector<uint8_t>(std::begin(chainparams_seed_testnet4), std::end(chainparams_seed_testnet4));
+        vFixedSeeds = std::vector<uint8_t>(std::begin(chainparams_seed_testnetq), std::end(chainparams_seed_testnetq));
 
         fDefaultConsistencyChecks = false;
         m_is_mockable_chain = false;
@@ -647,7 +647,7 @@ std::unique_ptr<const CChainParams> CChainParams::TestNet()
     return std::make_unique<const CTestNetParams>();
 }
 
-std::unique_ptr<const CChainParams> CChainParams::TestNet4()
+std::unique_ptr<const CChainParams> CChainParams::testnetq()
 {
     return std::make_unique<const CTestNetQParams>();
 }
@@ -667,7 +667,7 @@ std::optional<ChainType> GetNetworkForMagic(const MessageStartChars& message)
 {
     const auto mainnet_msg = CChainParams::Main()->MessageStart();
     const auto testnet_msg = CChainParams::TestNet()->MessageStart();
-    const auto testnet4_msg = CChainParams::TestNet4()->MessageStart();
+    const auto testnetq_msg = CChainParams::testnetq()->MessageStart();
     const auto regtest_msg = CChainParams::RegTest({})->MessageStart();
     const auto signet_msg = CChainParams::SigNet({})->MessageStart();
 
@@ -675,7 +675,7 @@ std::optional<ChainType> GetNetworkForMagic(const MessageStartChars& message)
         return ChainType::MAIN;
     } else if (std::ranges::equal(message, testnet_msg)) {
         return ChainType::TESTNET;
-    } else if (std::ranges::equal(message, testnet4_msg)) {
+    } else if (std::ranges::equal(message, testnetq_msg)) {
         return ChainType::TESTNETQ;
     } else if (std::ranges::equal(message, regtest_msg)) {
         return ChainType::REGTEST;

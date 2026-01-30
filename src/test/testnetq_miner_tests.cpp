@@ -17,17 +17,17 @@ using interfaces::Mining;
 using node::BlockAssembler;
 using node::BlockWaitOptions;
 
-namespace testnet4_miner_tests {
+namespace testnetq_miner_tests {
 
-struct Testnet4MinerTestingSetup : public Testnet4Setup {
+struct testnetqMinerTestingSetup : public testnetqSetup {
     std::unique_ptr<Mining> MakeMining()
     {
         return interfaces::MakeMining(m_node);
     }
 };
-} // namespace testnet4_miner_tests
+} // namespace testnetq_miner_tests
 
-BOOST_FIXTURE_TEST_SUITE(testnet4_miner_tests, Testnet4MinerTestingSetup)
+BOOST_FIXTURE_TEST_SUITE(testnetq_miner_tests, testnetqMinerTestingSetup)
 
 BOOST_AUTO_TEST_CASE(MiningInterface)
 {
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(MiningInterface)
     BlockAssembler::Options options;
     std::unique_ptr<BlockTemplate> block_template;
 
-    // Set node time a few minutes past the testnet4 genesis block
+    // Set node time a few minutes past the testnetq genesis block
     const int64_t genesis_time{WITH_LOCK(cs_main, return m_node.chainman->ActiveChain().Tip()->GetBlockTime())};
     SetMockTime(genesis_time + 3 * 60);
 

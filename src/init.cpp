@@ -447,12 +447,12 @@ void SetupServerArgs(ArgsManager& argsman, bool can_listen_ipc)
 
     const auto defaultBaseParams = CreateBaseChainParams(ChainType::MAIN);
     const auto testnetBaseParams = CreateBaseChainParams(ChainType::TESTNET);
-    const auto testnet4BaseParams = CreateBaseChainParams(ChainType::TESTNET4);
+    const auto testnet4BaseParams = CreateBaseChainParams(ChainType::TESTNETQ);
     const auto signetBaseParams = CreateBaseChainParams(ChainType::SIGNET);
     const auto regtestBaseParams = CreateBaseChainParams(ChainType::REGTEST);
     const auto defaultChainParams = CreateChainParams(argsman, ChainType::MAIN);
     const auto testnetChainParams = CreateChainParams(argsman, ChainType::TESTNET);
-    const auto testnet4ChainParams = CreateChainParams(argsman, ChainType::TESTNET4);
+    const auto testnet4ChainParams = CreateChainParams(argsman, ChainType::TESTNETQ);
     const auto signetChainParams = CreateChainParams(argsman, ChainType::SIGNET);
     const auto regtestChainParams = CreateChainParams(argsman, ChainType::REGTEST);
 

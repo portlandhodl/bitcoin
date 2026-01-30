@@ -160,7 +160,7 @@ std::list<SectionInfo> ArgsManager::GetUnrecognizedSections() const
         ChainTypeToString(ChainType::REGTEST),
         ChainTypeToString(ChainType::SIGNET),
         ChainTypeToString(ChainType::TESTNET),
-        ChainTypeToString(ChainType::TESTNET4),
+        ChainTypeToString(ChainType::TESTNETQ),
         ChainTypeToString(ChainType::MAIN),
     };
 
@@ -814,7 +814,7 @@ std::variant<ChainType, std::string> ArgsManager::GetChainArg() const
     if (fRegTest) return ChainType::REGTEST;
     if (fSigNet) return ChainType::SIGNET;
     if (fTestNet) return ChainType::TESTNET;
-    if (fTestNet4) return ChainType::TESTNET4;
+    if (fTestNet4) return ChainType::TESTNETQ;
     return ChainType::MAIN;
 }
 

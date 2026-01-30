@@ -76,7 +76,7 @@ static void SetupCliArgs(ArgsManager& argsman)
 
     const auto defaultBaseParams = CreateBaseChainParams(ChainType::MAIN);
     const auto testnetBaseParams = CreateBaseChainParams(ChainType::TESTNET);
-    const auto testnet4BaseParams = CreateBaseChainParams(ChainType::TESTNET4);
+    const auto testnet4BaseParams = CreateBaseChainParams(ChainType::TESTNETQ);
     const auto signetBaseParams = CreateBaseChainParams(ChainType::SIGNET);
     const auto regtestBaseParams = CreateBaseChainParams(ChainType::REGTEST);
 
@@ -427,7 +427,7 @@ private:
     std::string ChainToString() const
     {
         switch (gArgs.GetChainType()) {
-        case ChainType::TESTNET4:
+        case ChainType::TESTNETQ:
             return " testnet4";
         case ChainType::TESTNET:
             return " testnet";

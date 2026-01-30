@@ -133,7 +133,7 @@ struct RegTestingSetup : public TestingSetup {
 /** Identical to TestingSetup, but chain set to testnet4 */
 struct Testnet4Setup : public TestingSetup {
     Testnet4Setup()
-        : TestingSetup{ChainType::TESTNET4} {}
+        : TestingSetup{ChainType::TESTNETQ} {}
 };
 
 class CBlock;

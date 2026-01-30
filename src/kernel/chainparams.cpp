@@ -292,10 +292,10 @@ public:
 /**
  * Testnet (v4): public test network which is reset from time to time.
  */
-class CTestNet4Params : public CChainParams {
+class CTestNetQParams : public CChainParams {
 public:
-    CTestNet4Params() {
-        m_chain_type = ChainType::TESTNET4;
+    CTestNetQParams() {
+        m_chain_type = ChainType::TESTNETQ;
         consensus.signet_blocks = false;
         consensus.signet_challenge.clear();
         consensus.nSubsidyHalvingInterval = 210000;
@@ -649,7 +649,7 @@ std::unique_ptr<const CChainParams> CChainParams::TestNet()
 
 std::unique_ptr<const CChainParams> CChainParams::TestNet4()
 {
-    return std::make_unique<const CTestNet4Params>();
+    return std::make_unique<const CTestNetQParams>();
 }
 
 std::vector<int> CChainParams::GetAvailableSnapshotHeights() const
@@ -676,7 +676,7 @@ std::optional<ChainType> GetNetworkForMagic(const MessageStartChars& message)
     } else if (std::ranges::equal(message, testnet_msg)) {
         return ChainType::TESTNET;
     } else if (std::ranges::equal(message, testnet4_msg)) {
-        return ChainType::TESTNET4;
+        return ChainType::TESTNETQ;
     } else if (std::ranges::equal(message, regtest_msg)) {
         return ChainType::REGTEST;
     } else if (std::ranges::equal(message, signet_msg)) {

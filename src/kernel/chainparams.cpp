@@ -24,6 +24,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <cstdio>
 #include <type_traits>
 
 using namespace util::hex_literals;
@@ -329,7 +330,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].period = 2016;
 
         consensus.nMinimumChainWork = uint256{"0000000000000000000000000000000000000000000001d6dce8651b6094e4c1"};
-        consensus.defaultAssumeValid = uint256{"0000000000003ed4f08dbdf6f7d6b271a6bcffce25675cb40aa9fa43179a89f3"}; // 72600
+        consensus.defaultAssumeValid = uint256{"00000000840f7e56d819a670c58c30ecb5864a8bc0bd1b151dd1f394ea952d6f"}; // 72600
 
         pchMessageStart[0] = 0x1c;
         pchMessageStart[1] = 0x16;
@@ -340,19 +341,18 @@ public:
         m_assumed_blockchain_size = 11;
         m_assumed_chain_state_size = 1;
 
-        const char* genesis_msg = "29/Jan/2026 Q";
-        const CScript genesis_script = CScript() << "04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"_hex << OP_CHECKSIG;
+        const char* genesis_msg = "29/Jan/2026 - TQ -";
+        const CScript genesis_script = CScript() << "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"_hex << OP_CHECKSIG;
         genesis = CreateGenesisBlock(genesis_msg,
                 genesis_script,
-                1714777860,  // timestamp
-                2298260927,  // nonce
+                1770025648,  // timestamp
+                3126748171,  // nonce
                 0x1d00ffff,  // bits
-                1,  // version
-                50 * COIN);  // 5000000000 satoshis
+                1,           // version
+                5000000000ULL);  // 50 BTC in satoshis
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256{"000000006704319bfdedb388646ef9ba5cdb29409a3b2ee6abc564a81babb9af"});
-        assert(genesis.hashMerkleRoot == uint256{"72717a66893b778d67cf9b5b5033da4b79f04af31fe3c16cb0fce7512e71e23b"});
-
+        assert(consensus.hashGenesisBlock == uint256{"0000000054eac5e7db9cf6f8ff69b334939dd6cade1616bdf35da2f549fdb7b4"});
+        assert(genesis.hashMerkleRoot == uint256{"559b65062ca56fe3f1badc83f382c61ab7652fe654e43c35caa86e818ed80492"});
         vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top

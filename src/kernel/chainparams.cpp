@@ -330,7 +330,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].period = 2016;
 
         consensus.nMinimumChainWork = uint256{"0000000000000000000000000000000000000000000001d6dce8651b6094e4c1"};
-        consensus.defaultAssumeValid = uint256{"00000000840f7e56d819a670c58c30ecb5864a8bc0bd1b151dd1f394ea952d6f"}; // 72600
+        consensus.defaultAssumeValid = uint256{"0000000054eac5e7db9cf6f8ff69b334939dd6cade1616bdf35da2f549fdb7b4"}; // 0
 
         pchMessageStart[0] = 0x1c;
         pchMessageStart[1] = 0x16;

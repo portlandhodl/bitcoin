@@ -291,7 +291,7 @@ public:
 };
 
 /**
- * Testnet (v4): public test network which is reset from time to time.
+ * Testnet (vQ): public test network which is reset from time to time.
  */
 class CTestNetQParams : public CChainParams {
 public:

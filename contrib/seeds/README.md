@@ -21,7 +21,7 @@ curl https://luke.dashjr.org/programs/bitcoin/files/charts/seeds.txt >> seeds_ma
 curl https://mainnet.achownodes.xyz/seeds.txt.gz | gzip -dc >> seeds_main.txt
 curl https://signet.achownodes.xyz/seeds.txt.gz | gzip -dc > seeds_signet.txt
 curl https://testnet.achownodes.xyz/seeds.txt.gz | gzip -dc > seeds_test.txt
-curl https://testnetq.achownodes.xyz/seeds.txt.gz | gzip -dc > seeds_testnetq.txt
+curl https://testnet4.achownodes.xyz/seeds.txt.gz | gzip -dc > seeds_testnetq.txt
 curl https://raw.githubusercontent.com/asmap/asmap-data/main/latest_asmap.dat > asmap-filled.dat
 python3 makeseeds.py -a asmap-filled.dat -s seeds_main.txt > nodes_main.txt
 python3 makeseeds.py -a asmap-filled.dat -s seeds_signet.txt -m 237800 > nodes_signet.txt

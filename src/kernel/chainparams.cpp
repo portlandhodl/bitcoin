@@ -338,8 +338,8 @@ public:
         pchMessageStart[3] = 0x37;
         nDefaultPort = 58333;
         nPruneAfterHeight = 1000;
-        m_assumed_blockchain_size = 11;
-        m_assumed_chain_state_size = 1;
+        m_assumed_blockchain_size = 0;
+        m_assumed_chain_state_size = 0;
 
         const char* genesis_msg = "29/Jan/2026 - TQ -";
         const CScript genesis_script = CScript() << "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac"_hex << OP_CHECKSIG;
@@ -376,10 +376,9 @@ public:
         };
 
         chainTxData = ChainTxData{
-            // Data from RPC: getchaintxstats 4096 0000000000003ed4f08dbdf6f7d6b271a6bcffce25675cb40aa9fa43179a89f3
-            .nTime    = 1741070246,
-            .tx_count = 7653966,
-            .dTxRate  = 1.239174414591965,
+            .nTime    = 0,
+            .tx_count = 0,
+            .dTxRate  = 0,
         };
     }
 };
@@ -647,7 +646,7 @@ std::unique_ptr<const CChainParams> CChainParams::TestNet()
     return std::make_unique<const CTestNetParams>();
 }
 
-std::unique_ptr<const CChainParams> CChainParams::testnetq()
+std::unique_ptr<const CChainParams> CChainParams::TestNetq()
 {
     return std::make_unique<const CTestNetQParams>();
 }
@@ -667,7 +666,7 @@ std::optional<ChainType> GetNetworkForMagic(const MessageStartChars& message)
 {
     const auto mainnet_msg = CChainParams::Main()->MessageStart();
     const auto testnet_msg = CChainParams::TestNet()->MessageStart();
-    const auto testnetq_msg = CChainParams::testnetq()->MessageStart();
+    const auto testnetq_msg = CChainParams::TestNetq()->MessageStart();
     const auto regtest_msg = CChainParams::RegTest({})->MessageStart();
     const auto signet_msg = CChainParams::SigNet({})->MessageStart();
 

@@ -329,7 +329,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].threshold = 1512; // 75%
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].period = 2016;
 
-        consensus.nMinimumChainWork = uint256{"0000000000000000000000000000000000000000000001d6dce8651b6094e4c1"};
+        consensus.nMinimumChainWork = uint256{"0000000000000000000000000000000000000000000000000000059c059c059c"};
         consensus.defaultAssumeValid = uint256{"0000000054eac5e7db9cf6f8ff69b334939dd6cade1616bdf35da2f549fdb7b4"}; // 0
 
         pchMessageStart[0] = 0x13;

@@ -25,6 +25,7 @@
 #include <index/base.h>
 #include <index/blockfilterindex.h>
 #include <index/coinstatsindex.h>
+#include <index/spkindex.h>
 #include <interfaces/types.h>
 #include <kernel/coinstats.h>
 #include <logging/timer.h>
@@ -2564,6 +2565,71 @@ static bool CheckBlockFilterMatches(BlockManager& blockman, const CBlockIndex& b
     return false;
 }
 
+static RPCMethod getspktxouts()
+{
+    return RPCMethod{"getspktxouts",
+        "Returns all confirmed transaction outputs paying to the given scriptPubKey, ordered by block height.\n"
+        "Requires -spkindex to be enabled. Outputs are returned regardless of whether they have since been spent.",
+        {
+            {"scriptpubkey", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "The scriptPubKey to search for, as hex"},
+        },
+        RPCResult{
+            RPCResult::Type::ARR, "", "",
+            {
+                {RPCResult::Type::OBJ, "", "",
+                {
+                    {RPCResult::Type::STR_HEX, "txid", "The transaction id"},
+                    {RPCResult::Type::NUM, "vout", "The output index"},
+                    {RPCResult::Type::STR_AMOUNT, "amount", "The output value in " + CURRENCY_UNIT},
+                    {RPCResult::Type::NUM, "height", "The height of the block containing the transaction"},
+                    {RPCResult::Type::STR_HEX, "blockhash", "The hash of the block containing the transaction"},
+                }},
+            }
+        },
+        RPCExamples{
+            HelpExampleCli("getspktxouts", "\"0014751e76e8199196d454941c45d1b3a323f1433bd6\"")
+            + HelpExampleRpc("getspktxouts", "\"0014751e76e8199196d454941c45d1b3a323f1433bd6\"")
+        },
+        [](const RPCMethod& self, const JSONRPCRequest& request) -> UniValue
+        {
+            const std::vector<unsigned char> script_bytes{ParseHexV(request.params[0], "scriptpubkey")};
+            const CScript script(script_bytes.begin(), script_bytes.end());
+
+            if (!g_spkindex) {
+                throw JSONRPCError(RPC_MISC_ERROR, "Requires spkindex. Use -spkindex to enable it.");
+            }
+            if (!g_spkindex->BlockUntilSyncedToCurrentChain()) {
+                throw JSONRPCError(RPC_MISC_ERROR, "spkindex is still syncing. Try again later.");
+            }
+
+            const auto txouts{g_spkindex->FindTxOuts(script)};
+            if (!txouts) {
+                throw JSONRPCError(RPC_MISC_ERROR, txouts.error());
+            }
+
+            // A reorg may happen between syncing the index and reading from it, so drop any
+            // entries whose block has since left the active chain.
+            ChainstateManager& chainman{EnsureAnyChainman(request.context)};
+            LOCK(cs_main);
+            const CChain& active_chain{chainman.ActiveChain()};
+            UniValue result{UniValue::VARR};
+            result.reserve(txouts->size());
+            for (const auto& txout : *txouts) {
+                const CBlockIndex* block{active_chain[txout.height]};
+                if (!block || block->GetBlockHash() != txout.block_hash) continue;
+                UniValue o{UniValue::VOBJ};
+                o.pushKV("txid", txout.outpoint.hash.GetHex());
+                o.pushKV("vout", txout.outpoint.n);
+                o.pushKV("amount", ValueFromAmount(txout.txout.nValue));
+                o.pushKV("height", txout.height);
+                o.pushKV("blockhash", txout.block_hash.GetHex());
+                result.push_back(std::move(o));
+            }
+            return result;
+        },
+    };
+}
+
 static RPCMethod scanblocks()
 {
     return RPCMethod{
@@ -3685,6 +3751,7 @@ void RegisterBlockchainRPCCommands(CRPCTable& t)
         {"blockchain", &preciousblock},
         {"blockchain", &scantxoutset},
         {"blockchain", &scanblocks},
+        {"blockchain", &getspktxouts},
         {"blockchain", &getdescriptoractivity},
         {"blockchain", &getblockfilter},
         {"blockchain", &dumptxoutset},

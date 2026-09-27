@@ -118,6 +118,8 @@ protected:
 
     void BlockConnected(const kernel::ChainstateRole& role, const std::shared_ptr<const CBlock>& block, const CBlockIndex* pindex) override;
 
+    void BlockDisconnected(const std::shared_ptr<const CBlock>& block, const CBlockIndex* pindex) override;
+
     void ChainStateFlushed(const kernel::ChainstateRole& role, const CBlockLocator& locator) override;
 
     /// Initialize internal state from the database and block index.

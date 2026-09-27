@@ -393,6 +393,24 @@ void BaseIndex::BlockConnected(const ChainstateRole& role, const std::shared_ptr
     }
 }
 
+void BaseIndex::BlockDisconnected(const std::shared_ptr<const CBlock>& block, const CBlockIndex* pindex)
+{
+    if (!m_synced) {
+        return;
+    }
+
+    // Rewind eagerly so the index does not keep serving data from a block that is no longer in the
+    // active chain until the next block is connected. If the disconnected block is not our best
+    // block, the index is behind on the queue backlog and BlockConnected will rewind as needed.
+    if (m_best_block_index.load() != pindex) {
+        return;
+    }
+    if (!Rewind(pindex, pindex->pprev)) {
+        FatalErrorf("Failed to rewind %s after disconnecting block %s",
+                    GetName(), pindex->GetBlockHash().ToString());
+    }
+}
+
 void BaseIndex::ChainStateFlushed(const ChainstateRole& role, const CBlockLocator& locator)
 {
     // Ignore events from not fully validated chains to avoid out-of-order indexing.
@@ -447,11 +465,12 @@ bool BaseIndex::BlockUntilSyncedToCurrentChain() const
 
     {
         // Skip the queue-draining stuff if we know we're caught up with
-        // m_chain.Tip().
+        // m_chain.Tip(). If the index is ahead of the tip, a block disconnection
+        // is still queued, so drain the queue to let BlockDisconnected rewind it.
         LOCK(cs_main);
         const CBlockIndex* chain_tip = m_chainstate->m_chain.Tip();
         const CBlockIndex* best_block_index = m_best_block_index.load();
-        if (best_block_index->GetAncestor(chain_tip->nHeight) == chain_tip) {
+        if (best_block_index == chain_tip) {
             return true;
         }
     }
